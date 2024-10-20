@@ -1,8 +1,6 @@
-from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.db import models
 from django.urls import reverse
-
-from taxi.validators import validate_license_number
 
 
 class Manufacturer(models.Model):
@@ -17,11 +15,7 @@ class Manufacturer(models.Model):
 
 
 class Driver(AbstractUser):
-    license_number = models.CharField(
-        max_length=255,
-        unique=True,
-        validators=[validate_license_number]
-    )
+    license_number = models.CharField(max_length=255, unique=True)
 
     class Meta:
         verbose_name = "driver"

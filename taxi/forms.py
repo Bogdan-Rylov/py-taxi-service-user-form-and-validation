@@ -1,13 +1,13 @@
 from django import forms
 
 from taxi.models import Car, Driver
-from taxi.validators import validate_license_number
+from taxi.validators import LicenseNumberValidator
 
 
 class DriverLicenseUpdateForm(forms.ModelForm):
     license_number = forms.CharField(
         label="Driver's License",
-        validators=[validate_license_number],
+        validators=[LicenseNumberValidator()],
     )
 
     class Meta:

@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views import generic
 
@@ -64,6 +64,17 @@ class CarDetailView(LoginRequiredMixin, generic.DetailView):
     model = Car
     queryset = Car.objects.prefetch_related("drivers")
 
+    def post(self, request, *args, **kwargs):
+        car = self.get_object()
+        if "assign" in request.POST:
+            if not car.drivers.filter(id=request.user.id).exists():
+                car.drivers.add(request.user)
+        elif "delete" in request.POST:
+            if car.drivers.filter(id=request.user.id).exists():
+                car.drivers.remove(request.user)
+
+        return redirect("taxi:car-detail", pk=car.pk)
+
 
 class CarCreateView(LoginRequiredMixin, generic.CreateView):
     model = Car
@@ -80,24 +91,6 @@ class CarUpdateView(LoginRequiredMixin, generic.UpdateView):
 class CarDeleteView(LoginRequiredMixin, generic.DeleteView):
     model = Car
     success_url = reverse_lazy("taxi:car-list")
-
-
-@login_required
-def assign_me_to_car(request, pk):
-    car = get_object_or_404(Car, pk=pk)
-    if not car.drivers.filter(id=request.user.id).exists():
-        car.drivers.add(request.user)
-
-    return redirect("taxi:car-detail", pk=car.pk)
-
-
-@login_required
-def delete_me_from_car(request, pk):
-    car = get_object_or_404(Car, pk=pk)
-    if not car.drivers.filter(id=request.user.id).exists():
-        car.drivers.remove(request.user)
-
-    return redirect("taxi:car-detail", pk=car.pk)
 
 
 class DriverListView(LoginRequiredMixin, generic.ListView):
